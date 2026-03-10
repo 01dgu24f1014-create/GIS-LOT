@@ -99,7 +99,7 @@
     <div id="footer">Hak Cipta Terpelihara 2026 @ umrzcyn</div>
 
     <script src="js/leaflet.js"></script>
-    <script src="data/LOTFINAL_0.js"></script>
+    <script src="data/MERGE13_4.js"></script>
     <script src="data/TandaSempadanGabung_1.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -134,7 +134,8 @@
         function styleNormal() { return { color: '#ffffff', weight: 1.5, fillColor: '#8b5e3c', fillOpacity: 0.6 }; }
         function styleHighlight() { return { color: '#ff0000', weight: 3, fillColor: 'yellow', fillOpacity: 0.8 }; }
 
-        var layer_LOTFINAL_0 = new L.geoJson(json_LOTFINAL_0, {
+        // DIKEMASKINI: Guna json_MERGE13_4
+        var layer_MERGE13_4 = new L.geoJson(json_MERGE13_4, {
             style: styleNormal,
             onEachFeature: function(feature, layer) {
                 layer.on('click', function(e) {
@@ -175,14 +176,14 @@
         }).addTo(map);
 
         // Update Jumlah Lot di Menu
-        document.getElementById("totalLot").innerHTML = layer_LOTFINAL_0.getLayers().length + " Lot Tanah";
+        document.getElementById("totalLot").innerHTML = layer_MERGE13_4.getLayers().length + " Lot Tanah";
 
         // ================= 4. FUNGSI CARIAN LOT =================
         document.getElementById("findLot").addEventListener("click", function() {
             let searchValue = document.getElementById("searchLot").value.trim().toLowerCase();
             let dijumpai = false;
 
-            layer_LOTFINAL_0.eachLayer(function(layer) {
+            layer_MERGE13_4.eachLayer(function(layer) {
                 if ((layer.feature.properties["NO_LOT"] || "").toString().toLowerCase() === searchValue) {
                     map.fitBounds(layer.getBounds(), { maxZoom: 20 });
                     layer.fire('click'); // Jadikan ia auto-klik
@@ -202,20 +203,19 @@
 
         // ================= 5. ON/OFF LAYER DI PANEL =================
         document.getElementById("lotCheck").onchange = function() {
-            this.checked ? map.addLayer(layer_LOTFINAL_0) : map.removeLayer(layer_LOTFINAL_0);
+            this.checked ? map.addLayer(layer_MERGE13_4) : map.removeLayer(layer_MERGE13_4);
         };
         document.getElementById("tandaCheck").onchange = function() {
             this.checked ? map.addLayer(tandaLayer) : map.removeLayer(tandaLayer);
         };
 
-        // ================= 6. CETAK PDF (DIKEKALKAN DARI KOD ASAL) =================
+        // ================= 6. CETAK PDF =================
         document.getElementById("generatePDF").addEventListener("click", function() {
             if(!selectedLayer){
                 alert("Sila klik pada mana-mana lot tanah di peta terlebih dahulu.");
                 return;
             }
             alert("Fungsi Generate PDF diaktifkan untuk Lot: " + selectedLayer.feature.properties["NO_LOT"]);
-            // Letakkan fungsi html2canvas dan jsPDF anda yang asal di sini jika mahu diteruskan
         });
 
     </script>
