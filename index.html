@@ -1,412 +1,189 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TAMAN SAUJANA PUTRA</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAMAN SAUJANA PUTRA</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-    <style>
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-        }
+<style>
+html, body { width: 100%; height: 100%; margin: 0; padding: 0; font-family: Arial, sans-serif; overflow: hidden; }
 
-        /* ================= HEADER ================= */
-        #header {
-            position: relative;
-            width: 100%;
-            height: 80px;
-            background: #5a3e2b;
-            display: flex;
-            align-items: center;
-            padding: 0 40px;
-            color: white;
-            z-index: 7000;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        }
+/* ================= HEADER ================= */
+#header { position: relative; width: 100%; height: 110px; overflow: hidden; display: flex; align-items: center; padding: 0 40px; z-index: 5000; }
+#header video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); object-fit: cover; z-index: -2; }
+#header::after { content: ""; position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.5); top: 0; left: 0; z-index: -1; }
+#header img { height: 80px; margin-right: 20px; z-index: 2; }
+#header h1 { color: white; font-size: 32px; font-weight: bold; margin: 0; z-index: 2; }
 
-        #header h1 {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0;
-        }
+/* ================= MAP & UI ================= */
+#map { position: absolute; top: 110px; bottom: 35px; width: 100%; z-index: 1000; }
+#northArrow { position: absolute; top: 130px; right: 20px; width: 45px; height: 45px; background: white; border-radius: 50%; box-shadow: 0 3px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 4000; }
 
-        /* ================= MAP ================= */
-        #map {
-            position: absolute;
-            top: 80px;
-            bottom: 35px; /* Ruang untuk footer */
-            width: 100%;
-            z-index: 1000;
-        }
+/* ================= DASHBOARD ================= */
+#menuBtn { position: absolute; top: 130px; left: 15px; background: #5a3e2b; color: white; padding: 10px 14px; border-radius: 8px; cursor: pointer; z-index: 6000; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+#dashboard { position: absolute; top: 110px; left: -360px; width: 320px; bottom: 35px; background: white; z-index: 6500; padding: 20px; overflow-y: auto; transition: 0.3s; box-shadow: 4px 0 10px rgba(0,0,0,0.2); }
+#dashboard.active { left: 0; }
+#dashboard h2 { margin: 0; color: #5a3e2b; }
+.dashboard-section { margin-bottom: 18px; }
+.dashboard-section label { font-weight: bold; display: block; margin-bottom: 5px; }
+.dashboard-section input, .dashboard-section button { width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; }
+.dashboard-section button { background: #8b5e3c; color: white; border: none; cursor: pointer; font-weight: bold; }
+.dashboard-info { background: #f3f3f3; padding: 10px; margin-top: 8px; font-size: 14px; border-radius: 4px; border: 1px solid #ddd; }
 
-        /* ================= LEFT DASHBOARD & MENU BUTTON ================= */
-        #menuBtn {
-            position: absolute;
-            top: 100px;
-            left: 15px;
-            background: #8b5e3c;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            z-index: 6000;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 2px solid white;
-            transition: 0.2s;
-        }
+/* ================= PANEL LAYERS ================= */
+#gmLayersBtn { position: absolute; bottom: 60px; right: 20px; width: 110px; height: 85px; background: white; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); cursor: pointer; overflow: hidden; z-index: 6000; display: flex; flex-direction: column; justify-content: flex-end; }
+#gmLayersBtn img { position: absolute; width: 100%; height: 100%; object-fit: cover; }
+#gmLayersBtn span { position: relative; background: rgba(255,255,255,0.95); text-align: center; font-weight: bold; padding: 6px 0; font-size: 14px; }
+#gmPanel { position: absolute; bottom: 160px; right: 20px; width: 240px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 6500; padding: 18px; display: none; }
+.gmOption { display: flex; align-items: center; margin-bottom: 8px; font-size: 14px; }
 
-        #menuBtn:hover {
-            background: #5a3e2b;
-        }
-
-        #dashboard {
-            position: absolute;
-            top: 80px;
-            left: -350px;
-            width: 320px;
-            bottom: 35px;
-            background: white;
-            z-index: 6500;
-            padding: 20px;
-            overflow-y: auto;
-            box-shadow: 4px 0 10px rgba(0,0,0,0.2);
-            transition: left 0.4s ease;
-        }
-
-        #dashboard.active {
-            left: 0; /* Dashboard terbuka bila class 'active' ditambah */
-        }
-
-        .dashboard-section {
-            margin-bottom: 20px;
-        }
-
-        .dashboard-section label {
-            font-weight: bold;
-            color: #5a3e2b;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .dashboard-section input[type="text"] {
-            width: 90%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 8px;
-        }
-
-        .dashboard-section button {
-            width: 100%;
-            padding: 10px;
-            background: #8b5e3c;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .dashboard-section button:hover {
-            background: #5a3e2b;
-        }
-
-        .dashboard-info {
-            background: #f9f9f9;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* ================= LAYERS PANEL (RIGHT) ================= */
-        #gmLayersBtn {
-            position: absolute;
-            bottom: 60px;
-            right: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            cursor: pointer;
-            z-index: 6000;
-            padding: 10px 15px;
-            font-weight: bold;
-            color: #5a3e2b;
-            border: 2px solid #8b5e3c;
-        }
-
-        #gmPanel {
-            position: absolute;
-            bottom: 110px;
-            right: 20px;
-            width: 220px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-            z-index: 6500;
-            padding: 15px;
-            display: none; /* Disorok pada asalnya */
-        }
-
-        #gmPanel h3 {
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            color: #5a3e2b;
-        }
-
-        .gmOption {
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        /* ================= FOOTER ================= */
-        #footer {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 35px;
-            background: #8b5e3c;
-            color: white;
-            text-align: center;
-            line-height: 35px;
-            font-size: 14px;
-            z-index: 7000;
-        }
-    </style>
+/* ================= FOOTER ================= */
+#footer { position: fixed; bottom: 0; width: 100%; background: #8b5e3c; color: white; text-align: center; padding: 8px 0; font-size: 14px; z-index: 7000; }
+</style>
 </head>
 
 <body>
+<div id="header">
+    <video autoplay muted loop playsinline><source src="VIDEO 1.mp4" type="video/mp4"></video>
+    <img src="PUO.png" alt="Logo">
+    <h1>TAMAN SAUJANA PUTRA</h1>
+</div>
 
-    <div id="header">
-        <h1>TAMAN SAUJANA PUTRA</h1>
-    </div>
-
-    <div id="map"></div>
-
-    <div id="menuBtn">☰ Menu Dashboard</div>
-
-    <div id="dashboard">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 style="margin:0; color:#5a3e2b;">DASHBOARD</h2>
-            <button id="closeDashboard" style="background:red; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">✖</button>
-        </div>
-        <hr style="border-color:#ccc; margin: 15px 0;">
-
-        <div class="dashboard-section">
-            <label>Carian Lot (Land Explorer)</label>
-            <input type="text" id="searchLot" placeholder="Masukkan No Lot (cth: 1234)">
-            <button id="findLot">Cari Lot</button>
-            <button id="resetLot" style="background:#555;">Reset Carian</button>
-        </div>
-
-        <div class="dashboard-section">
-            <label>Maklumat Lot Dipilih</label>
-            <div id="lotInfo" class="dashboard-info">
-                <i>Sila klik pada mana-mana lot di peta atau buat carian.</i>
-            </div>
-        </div>
-    </div>
-
-    <div id="gmLayersBtn">🌍 Susunan Peta (Layers)</div>
-
-    <div id="gmPanel">
-        <h3>Jenis Peta (Basemap)</h3>
-        <div class="gmOption"><input type="radio" name="basemap" id="satRadio" checked> Satellite</div>
-        <div class="gmOption"><input type="radio" name="basemap" id="streetRadio"> Street</div>
-        
-        <hr style="border-color:#eee;">
-        
-        <h3>Data Layer</h3>
-        <div class="gmOption"><input type="checkbox" id="lotCheck" checked> Papar Lot Tanah</div>
-    </div>
-
-    <div id="footer">
-        Hak Cipta Terpelihara 2026 @ umrzcyn
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<div id="map"></div>
+<div id="northArrow"><img src="north.png" width="30"></div>
     
-    <script src="data/LOTFINAL_0.js"></script>
+<div id="menuBtn">☰ Menu Dashboard</div>
 
-    <script>
-        // 1. SETUP MAP
-        var map = L.map('map', {
-            zoomControl: true,
-            maxZoom: 22,
-            minZoom: 5
-        }).fitBounds([
-            [2.103090, 102.520846],
-            [2.104445, 102.523314] // Koordinat zoom kawasan Saujana Putra
-        ]);
+<div id="dashboard">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>DASHBOARD</h2>
+        <button id="closeDashboard" style="background:red; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; width:auto;">✖</button>
+    </div><hr>
 
-        // 2. SETUP BASEMAPS
-        var satellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 22 }).addTo(map);
-        var street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 22 });
+    <div class="dashboard-section"><label>Total Lot Ditemui:</label><div id="totalLot" class="dashboard-info">-</div></div>
+    
+    <div class="dashboard-section">
+        <label>Carian Lot (Land Explorer)</label>
+        <input type="text" id="searchLot" placeholder="Masukkan No Lot">
+        <button id="findLot">Cari Lot</button>
+        <button id="resetLot" style="background:#555;">Reset</button>
+    </div>
 
-        // 3. STYLE UNTUK LOT TANAH
-        function styleNormal() {
-            return {
-                color: '#ffffff', // Garisan putih
-                weight: 1.5,
-                fillColor: '#8b5e3c', // Warna coklat
-                fillOpacity: 0.5
-            };
-        }
+    <div class="dashboard-section">
+        <label>Maklumat Lot Dipilih</label>
+        <div id="lotInfo" class="dashboard-info">Tiada lot dipilih</div>
+        <button id="generatePDF" style="background:#28a745; margin-top:10px;">Generate PDF Lot</button>
+    </div>
+</div>
 
-        function styleHighlight() {
-            return {
-                color: '#ff0000', // Garisan merah bila diklik
-                weight: 3,
-                fillColor: 'yellow', // Warna kuning bila diklik
-                fillOpacity: 0.7
-            };
-        }
+<div id="gmLayersBtn"><img src="MAPS.png"><span>Layers</span></div>
 
-        var selectedLayer = null;
+<div id="gmPanel">
+    <h3 style="margin-top:0;">Jenis Peta</h3>
+    <div class="gmOption"><input type="radio" name="basemap" id="satRadio" checked> Satellite</div>
+    <div class="gmOption"><input type="radio" name="basemap" id="streetRadio"> Street</div><hr>
+    <h3>Data Layer</h3>
+    <div class="gmOption"><input type="checkbox" id="lotCheck" checked> Lot Final</div>
+</div>
 
-        // 4. FUNGSI KLIK PADA LOT
-        function onEachFeature(feature, layer) {
-            layer.on({
-                click: function(e) {
-                    // Reset warna lot yang dipilih sebelum ini
-                    if (selectedLayer) {
-                        selectedLayer.setStyle(styleNormal());
-                    }
+<div id="footer">Hak Cipta Terpelihara 2026 @ umrzcyn</div>
 
-                    // Highlight lot baru
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="data/LOTFINAL_0.js"></script>
+
+<script>
+    // ================= 1. AKTIFKAN BUTANG UI DAHULU (KALIS RALAT) =================
+    document.getElementById("menuBtn").onclick = function() { document.getElementById("dashboard").classList.add("active"); };
+    document.getElementById("closeDashboard").onclick = function() { document.getElementById("dashboard").classList.remove("active"); };
+    
+    var gmPanel = document.getElementById("gmPanel");
+    document.getElementById("gmLayersBtn").onclick = function() { gmPanel.style.display = (gmPanel.style.display === "block") ? "none" : "block"; };
+
+    // ================= 2. SETUP MAP & BASEMAP =================
+    var map = L.map('map', { zoomControl: false, maxZoom: 22, minZoom: 5 }).fitBounds([[2.103090, 102.520846], [2.104445, 102.523314]]);
+    L.control.zoom({ position: 'topleft' }).addTo(map);
+
+    var satellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 22 }).addTo(map);
+    var street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 22 });
+
+    document.getElementById("satRadio").onclick = function() { map.removeLayer(street); map.addLayer(satellite); };
+    document.getElementById("streetRadio").onclick = function() { map.removeLayer(satellite); map.addLayer(street); };
+
+    // ================= 3. LOAD DATA LOT (JIKA WUJUD) =================
+    var layer_LOTFINAL_0;
+    var selectedLayer = null;
+
+    function styleNormal() { return { color: '#ffffff', weight: 1, fillColor: '#a47148', fillOpacity: 0.7 }; }
+    function styleHighlight() { return { color: '#ff0000', weight: 3, fillColor: 'yellow', fillOpacity: 0.8 }; }
+
+    // Semak jika data fail JS berjaya dimuatkan
+    if (typeof json_LOTFINAL_0 !== 'undefined') {
+        
+        layer_LOTFINAL_0 = new L.geoJson(json_LOTFINAL_0, {
+            style: styleNormal,
+            onEachFeature: function(feature, layer) {
+                layer.on('click', function(e) {
+                    if (selectedLayer) { selectedLayer.setStyle(styleNormal()); }
                     selectedLayer = layer;
                     layer.setStyle(styleHighlight());
                     layer.bringToFront();
 
-                    // Ambil data dari properties GeoJSON (PENTING: Pastikan ejaan properties sama dengan fail QGIS/GeoJSON anda)
-                    let noLot = feature.properties["NO_LOT"] || "Tiada Data";
-                    let luas = feature.properties["AREA"] || "Tiada Data";
-                    let namaPemilik = feature.properties["tsp — pe"] || feature.properties["PEMILIK"] || "Tiada Maklumat";
+                    // AMBIL DATA DARI QGIS (Tukar kalau nama attribute lain)
+                    let noPA = feature.properties["tsp — _1"] || "-";
+                    let noLot = feature.properties["NO_LOT"] || "-";
+                    let luas = feature.properties["AREA"] ? parseFloat(feature.properties["AREA"]).toFixed(2) : "-";
+                    let pemilik = feature.properties["tsp — pe"] || "-";
 
-                    // Update Popup di Map
-                    let popupContent = `
-                        <b>No Lot:</b> ${noLot}<br>
-                        <b>Keluasan:</b> ${parseFloat(luas).toFixed(2)} m²<br>
-                        <b>Pemilik:</b> ${namaPemilik}
-                    `;
-                    layer.bindPopup(popupContent).openPopup();
-
-                    // Update Dashboard di Kiri
-                    document.getElementById("lotInfo").innerHTML = `
-                        <b>No Lot:</b> ${noLot}<br>
-                        <b>Keluasan:</b> ${parseFloat(luas).toFixed(2)} m²<br>
-                        <b>Pemilik:</b> ${namaPemilik}
-                    `;
-
-                    // Buka dashboard secara automatik bila lot diklik (jika belum buka)
+                    let infoHTML = `<b>No PA:</b> ${noPA}<br><b>No Lot:</b> ${noLot}<br><b>Keluasan:</b> ${luas} m²<br><b>Pemilik:</b> ${pemilik}`;
+                    
+                    layer.bindPopup(`<div style="font-size:14px;">${infoHTML}</div>`).openPopup();
+                    document.getElementById("lotInfo").innerHTML = infoHTML;
                     document.getElementById("dashboard").classList.add("active");
-                }
-            });
-        }
-
-        // Masukkan data lot ke dalam map
-        var layerLot = new L.geoJson(json_LOTFINAL_0, {
-            style: styleNormal,
-            onEachFeature: onEachFeature
+                });
+            }
         }).addTo(map);
 
+        document.getElementById("totalLot").innerHTML = layer_LOTFINAL_0.getLayers().length;
 
-        // ================= FUNGSI INTERAKTIF BUTANG & PANEL =================
-
-        // Buka/Tutup Dashboard Kiri
-        document.getElementById("menuBtn").onclick = function() {
-            document.getElementById("dashboard").classList.add("active");
-        };
-        document.getElementById("closeDashboard").onclick = function() {
-            document.getElementById("dashboard").classList.remove("active");
-        };
-
-        // Buka/Tutup Panel Layers Kanan
-        var gmPanel = document.getElementById("gmPanel");
-        document.getElementById("gmLayersBtn").onclick = function() {
-            if (gmPanel.style.display === "block") {
-                gmPanel.style.display = "none";
-            } else {
-                gmPanel.style.display = "block";
-            }
-        };
-
-        // Tukar Basemap (Satelit / Street)
-        document.getElementById("satRadio").onclick = function() {
-            map.removeLayer(street);
-            map.addLayer(satellite);
-        };
-        document.getElementById("streetRadio").onclick = function() {
-            map.removeLayer(satellite);
-            map.addLayer(street);
-        };
-
-        // On/Off Layer Lot
-        document.getElementById("lotCheck").onchange = function() {
-            if (this.checked) {
-                map.addLayer(layerLot);
-            } else {
-                map.removeLayer(layerLot);
-            }
-        };
-
-        // ================= FUNGSI CARIAN (LAND EXPLORER) =================
+        // FUNGSI CARIAN LOT
         document.getElementById("findLot").onclick = function() {
             let searchValue = document.getElementById("searchLot").value.trim().toLowerCase();
-            let dijumpai = false;
-
-            if(searchValue === "") {
-                alert("Sila masukkan nombor lot.");
-                return;
-            }
-
-            layerLot.eachLayer(function(layer) {
-                let noLot = (layer.feature.properties["NO_LOT"] || "").toString().toLowerCase();
-                
-                if (noLot === searchValue) {
-                    dijumpai = true;
-                    
-                    // Zoom map ke lot
+            let jumpa = false;
+            layer_LOTFINAL_0.eachLayer(function(layer) {
+                if ((layer.feature.properties["NO_LOT"] || "").toString().toLowerCase() === searchValue) {
                     map.fitBounds(layer.getBounds());
-                    
-                    // Fire event klik pada lot tersebut supaya ia di-highlight dan maklumat dikemaskini
-                    layer.fire('click'); 
+                    layer.fire('click'); // Auto klik
+                    jumpa = true;
                 }
             });
-
-            if(!dijumpai) {
-                alert("Lot " + searchValue + " tidak dijumpai dalam pangkalan data.");
-            }
+            if(!jumpa) alert("Lot tidak dijumpai.");
         };
 
-        // Fungsi Reset
+        // FUNGSI RESET
         document.getElementById("resetLot").onclick = function() {
             document.getElementById("searchLot").value = "";
-            document.getElementById("lotInfo").innerHTML = "<i>Sila klik pada mana-mana lot di peta atau buat carian.</i>";
-            
-            if (selectedLayer) {
-                selectedLayer.setStyle(styleNormal());
-                selectedLayer = null;
-            }
+            document.getElementById("lotInfo").innerHTML = "Tiada lot dipilih";
+            if (selectedLayer) { selectedLayer.setStyle(styleNormal()); selectedLayer = null; }
             map.closePopup();
-            
-            // Reset zoom ke asal
-            map.fitBounds([
-                [2.103090, 102.520846],
-                [2.104445, 102.523314]
-            ]);
+            map.fitBounds([[2.103090, 102.520846], [2.104445, 102.523314]]);
         };
 
-    </script>
+        // ON/OFF LAYER
+        document.getElementById("lotCheck").onchange = function() {
+            this.checked ? map.addLayer(layer_LOTFINAL_0) : map.removeLayer(layer_LOTFINAL_0);
+        };
+
+    } else {
+        // JIKA FAIL DATA TIDAK WUJUD ATAU CORRUPT
+        alert("AMARAN: Fail data 'data/LOTFINAL_0.js' gagal dimuatkan. Peta mungkin kosong.");
+        document.getElementById("totalLot").innerHTML = "Data Ralat!";
+    }
+
+</script>
 </body>
 </html>
